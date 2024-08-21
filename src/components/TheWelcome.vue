@@ -1,88 +1,148 @@
 <script setup>
-import WelcomeItem from './WelcomeItem.vue'
-import DocumentationIcon from './icons/IconDocumentation.vue'
-import ToolingIcon from './icons/IconTooling.vue'
-import EcosystemIcon from './icons/IconEcosystem.vue'
-import CommunityIcon from './icons/IconCommunity.vue'
-import SupportIcon from './icons/IconSupport.vue'
+import { ref, computed } from 'vue'
+import { useTaskStore } from '@/stores/tareaAlmacenamiento';
+
+const dialogVisible = ref(null)
+const dialogVisibleEdit = ref(null)
+const descripcion = ref('')
+const idEditando = ref(null)
+
+const taskStore = useTaskStore()
+
+const abrirDialog = () => {
+  if (dialogVisible.value) {
+    dialogVisible.value.showModal()
+  }
+}
+
+const cerrarDialog = () => {
+  if (dialogVisible.value) {
+    dialogVisible.value.close()
+  }
+}
+
+const abrirDialogEdit = (task) => {
+  if (dialogVisibleEdit.value) {
+    dialogVisibleEdit.value.showModal()
+    descripcion.value = task.descripcion_tarea
+    idEditando.value = task.id
+  }
+}
+
+const cerrarDialogEdit = () => {
+  if (dialogVisibleEdit.value) {
+    dialogVisibleEdit.value.close()
+    idEditando.value = null
+    descripcion.value = ''
+  }
+}
+
+const agregarTarea = () => {
+  if (descripcion.value.trim() !== '') {
+    const nuevaTarea = {
+      descripcion_tarea: descripcion.value,
+      completado_tarea: false
+    }
+    taskStore.addTask(nuevaTarea)
+    descripcion.value = ''
+    cerrarDialog()
+  }
+}
+
+const editarTarea = () => {
+  if (idEditando.value !== null && descripcion.value.trim() !== '') {
+    taskStore.updateTask(idEditando.value, {
+      descripcion_tarea: descripcion.value
+    })
+    cerrarDialogEdit()
+  }
+}
+
+const toggleComplete = (task) => {
+  taskStore.updateTask(task.id, {
+    completado_tarea: !task.completado_tarea // Toggle the completion status
+  })
+}
+
+// Computed property to filter incomplete tasks
+const tareasNoCompletadas = computed(() => {
+  return taskStore.tasks.filter(task => !task.completado_tarea)
+})
 </script>
 
+
 <template>
-  <WelcomeItem>
-    <template #icon>
-      <DocumentationIcon />
-    </template>
-    <template #heading>Documentation</template>
+  <div class="template-crud">
+    <button class="boton-add" @click="abrirDialog">+ Agregar tarea</button>
 
-    Vue’s
-    <a href="https://vuejs.org/" target="_blank" rel="noopener">official documentation</a>
-    provides you with all information you need to get started.
-  </WelcomeItem>
+    <dialog ref="dialogVisible">
+      <h2>Agregar Tarea</h2>
+      <div class="cuerpo">
+        <p>Descripción</p>
+        <input v-model="descripcion" type="text" placeholder="Escribe tu tarea..." />
+      </div>
+      <div class="pie">
+        <button @click="cerrarDialog">Cerrar</button>
+        <button @click="agregarTarea">Agregar</button>
+      </div>
+    </dialog>
 
-  <WelcomeItem>
-    <template #icon>
-      <ToolingIcon />
-    </template>
-    <template #heading>Tooling</template>
+    <dialog ref="dialogVisibleEdit">
+      <h2>Editar Tarea</h2>
+      <div class="cuerpo">
+        <p>Descripción</p>
+        <input v-model="descripcion" type="text" placeholder="Escribe tu tarea..." />
+      </div>
+      <div class="pie">
+        <button @click="cerrarDialogEdit">Cerrar</button>
+        <button @click="editarTarea">Editar</button>
+      </div>
+    </dialog>
 
-    This project is served and bundled with
-    <a href="https://vitejs.dev/guide/features.html" target="_blank" rel="noopener">Vite</a>. The
-    recommended IDE setup is
-    <a href="https://code.visualstudio.com/" target="_blank" rel="noopener">VSCode</a> +
-    <a href="https://github.com/johnsoncodehk/volar" target="_blank" rel="noopener">Volar</a>. If
-    you need to test your components and web pages, check out
-    <a href="https://www.cypress.io/" target="_blank" rel="noopener">Cypress</a> and
-    <a href="https://on.cypress.io/component" target="_blank" rel="noopener"
-      >Cypress Component Testing</a
-    >.
-
-    <br />
-
-    More instructions are available in <code>README.md</code>.
-  </WelcomeItem>
-
-  <WelcomeItem>
-    <template #icon>
-      <EcosystemIcon />
-    </template>
-    <template #heading>Ecosystem</template>
-
-    Get official tools and libraries for your project:
-    <a href="https://pinia.vuejs.org/" target="_blank" rel="noopener">Pinia</a>,
-    <a href="https://router.vuejs.org/" target="_blank" rel="noopener">Vue Router</a>,
-    <a href="https://test-utils.vuejs.org/" target="_blank" rel="noopener">Vue Test Utils</a>, and
-    <a href="https://github.com/vuejs/devtools" target="_blank" rel="noopener">Vue Dev Tools</a>. If
-    you need more resources, we suggest paying
-    <a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">Awesome Vue</a>
-    a visit.
-  </WelcomeItem>
-
-  <WelcomeItem>
-    <template #icon>
-      <CommunityIcon />
-    </template>
-    <template #heading>Community</template>
-
-    Got stuck? Ask your question on
-    <a href="https://chat.vuejs.org" target="_blank" rel="noopener">Vue Land</a>, our official
-    Discord server, or
-    <a href="https://stackoverflow.com/questions/tagged/vue.js" target="_blank" rel="noopener"
-      >StackOverflow</a
-    >. You should also subscribe to
-    <a href="https://news.vuejs.org" target="_blank" rel="noopener">our mailing list</a> and follow
-    the official
-    <a href="https://twitter.com/vuejs" target="_blank" rel="noopener">@vuejs</a>
-    twitter account for latest news in the Vue world.
-  </WelcomeItem>
-
-  <WelcomeItem>
-    <template #icon>
-      <SupportIcon />
-    </template>
-    <template #heading>Support Vue</template>
-
-    As an independent project, Vue relies on community backing for its sustainability. You can help
-    us by
-    <a href="https://vuejs.org/sponsor/" target="_blank" rel="noopener">becoming a sponsor</a>.
-  </WelcomeItem>
+    <ul>
+      <li v-for="task in tareasNoCompletadas" :key="task.id">
+        <input type="checkbox" :checked="task.completado_tarea" @change="toggleComplete(task)" />
+        {{ task.descripcion_tarea }}
+        <button @click="abrirDialogEdit(task)">Editar</button>
+        <button @click="taskStore.deleteTask(task.id)">Eliminar</button>
+      </li>
+    </ul>
+  </div>
 </template>
+
+
+<style scoped>
+.template-crud {
+  border: 1px solid rgb(73, 201, 201);
+  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 10px 20px;
+}
+
+.boton-add {
+  background-color: blue;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+dialog {
+  border: none;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin: auto;
+}
+
+button {
+  background-color: #ff4d4f;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+</style>
