@@ -83,7 +83,7 @@ const tareasNoCompletadas = computed(() => {
       </div>
       <div class="pie">
         <button @click="cerrarDialog">Cerrar</button>
-        <button @click="agregarTarea">Agregar</button>
+        <button class="boton-edit" @click="agregarTarea">Agregar</button>
       </div>
     </dialog>
 
@@ -95,16 +95,21 @@ const tareasNoCompletadas = computed(() => {
       </div>
       <div class="pie">
         <button @click="cerrarDialogEdit">Cerrar</button>
-        <button @click="editarTarea">Editar</button>
+        <button class="boton-edit" @click="editarTarea">Editar</button>
       </div>
     </dialog>
 
     <ul>
       <li v-for="task in tareasNoCompletadas" :key="task.id">
-        <input type="checkbox" :checked="task.completado_tarea" @change="toggleComplete(task)" />
-        {{ task.descripcion_tarea }}
-        <button @click="abrirDialogEdit(task)">Editar</button>
-        <button @click="taskStore.deleteTask(task.id)">Eliminar</button>
+        <div class="tarea">
+          <input type="checkbox" :checked="task.completado_tarea" @change="toggleComplete(task)" />
+          {{ task.descripcion_tarea }}
+        </div>
+        <div class="botones-edit-delete">
+          <button class="boton-edit" @click="abrirDialogEdit(task)">Editar</button>
+          <button @click="taskStore.deleteTask(task.id)">Eliminar</button>
+        </div>
+        
       </li>
     </ul>
   </div>
@@ -145,4 +150,42 @@ button {
   border: none;
   cursor: pointer;
 }
+li{
+  list-style: none;
+  border: 2px solid rgb(204, 179, 179);
+  border-radius: 10px;
+  padding: 10px ;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+.botones-edit-delete{
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+.boton-edit{
+  background-color: #337733;
+}
+.tarea{
+  display: flex;
+  gap: 10px;
+  justify-content: start;
+  align-items: center;
+}
+
+.pie{
+  margin-top: 10px;
+  display: flex;
+  gap: 5px;
+  justify-content: end;
+}
+
+.input{
+  padding: 20px;
+  border-radius: 5px;
+}
+
 </style>
